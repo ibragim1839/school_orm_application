@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add task page</title>
+    <link type="text/css" rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body class="mb-5">
+<div th:insert="~{navbar.html}"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-6 mx-auto mt-5">
+            <form th:action="@{'/addTask'}" method="post">
+                <div class="mb-3">
+                    <label for="input1" class="form-label">Имя</label>
+                    <input id="input1" class="form-control" name="name" type="text">
+                </div>
+                <div class="mb-3">
+                    <label for="input2" class="form-label">Название курса</label>
+                    <input id="input2" class="form-control" name="course" type="text">
+                </div>
+                <div class="mb-3">
+                    <label for="input3" class="form-label">Комментарий</label>
+                    <textarea name="commentary" id="input3" class="form-control" style="height: 200px"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="input4" class="form-label">Номер телефона</label>
+                    <input id="input4" class="form-control" name="number" type="text">
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Добавить задание</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

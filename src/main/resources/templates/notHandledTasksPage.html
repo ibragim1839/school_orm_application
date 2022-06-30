@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Handled tasks</title>
+    <link type="text/css" rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body class="mb-5">
+<div th:insert="~{navbar.html}"></div>
+<div class="container">
+    <div class="row">
+        <div th:each="task : ${notHandledTasks}" class="col-5 mx-auto mt-5">
+            <div class="card">
+                <div class="card-header">
+                    <span th:if="${task.handled==false}" style="font-weight: bold; font-size: large; color: red">НОВАЯ</span>
+                    <span style="font-weight: bold; font-size: large">ЗАВЯКА ОТ: &nbsp;<h4 th:text="${task.userName}"></h4></span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${task.commentary}"></h5>
+                    <span>Название курса: </span><span class="card-text" th:text="${task.courseName}"></span>
+                    <span>|| Номер телефона: </span><span class="card-text" th:text="${task.phoneNumber}"></span>
+
+                    <br><a th:href="@{'/details/'+${task.id}}" class="btn btn-primary mt-2">Подробнее</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>
