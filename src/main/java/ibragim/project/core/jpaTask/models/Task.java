@@ -1,21 +1,20 @@
 package ibragim.project.core.jpaTask.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@Table(name="t_tasks")
 @NoArgsConstructor
-@Table(name="tasks_table")
 public class Task {
 
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY )
     @Column(name = "id")
     Long id;
 
@@ -33,4 +32,8 @@ public class Task {
 
     @Column(name="handled")
     Boolean handled;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Teacher teacher;
+
 }

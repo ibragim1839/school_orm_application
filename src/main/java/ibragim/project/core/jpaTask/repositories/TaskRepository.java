@@ -13,4 +13,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     public List<Task> findAllByHandledIsTrue();
     public List<Task> findAllByHandledIsFalse();
+
+
 }
