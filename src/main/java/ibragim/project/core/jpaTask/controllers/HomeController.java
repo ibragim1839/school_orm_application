@@ -7,6 +7,8 @@ import ibragim.project.core.jpaTask.repositories.CommentsRepository;
 import ibragim.project.core.jpaTask.repositories.TaskRepository;
 import ibragim.project.core.jpaTask.repositories.TeachersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.Banner;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -89,9 +91,9 @@ public class HomeController {
         Task theTask = taskRepository.findById(id).orElse(null);
         model.addAttribute("task",theTask);
 
-        Comment comment = commentsRepository.getComment(theTask.getId(), theTask.getTeacher().getId());
-        if(comment!=null){
-            model.addAttribute("comment", comment);
+        List <Comment> comments = commentsRepository.getComment(theTask.getId(), theTask.getTeacher().getId());
+        if(comments!=null){
+            model.addAttribute("comments", comments);
         }
         return "details";
 
@@ -114,5 +116,22 @@ public class HomeController {
         }
         taskRepository.deleteById(id);
         return "redirect:/";
+    }
+
+    @PostMapping(value = "/addComment")
+    public String addComment(@RequestParam(name = "teacher") Long teacherId,
+                             @RequestParam(name = "task") Long taskId,
+                             @RequestParam(name="comment") String commentText,
+                             Model model){
+        Comment comment = new Comment();
+        Task t = taskRepository.findById(taskId).orElse(null);
+        Teacher teacher = teachersRepository.findById(teacherId).orElse(null);
+        if(t != null && teacher !=null){
+            comment.setTeacher(teacher);
+            comment.setTask(t);
+            comment.setText(commentText);
+            commentsRepository.save(comment);
+        }
+        return "redirect:/details/"+taskId;
     }
 }
