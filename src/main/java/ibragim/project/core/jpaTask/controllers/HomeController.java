@@ -6,22 +6,33 @@ import ibragim.project.core.jpaTask.models.Teacher;
 import ibragim.project.core.jpaTask.repositories.CommentsRepository;
 import ibragim.project.core.jpaTask.repositories.TaskRepository;
 import ibragim.project.core.jpaTask.repositories.TeachersRepository;
+import ibragim.project.core.jpaTask.services.CommentService;
+import ibragim.project.core.jpaTask.services.Impl.CommentServiceImpl;
+import ibragim.project.core.jpaTask.services.TaskService;
+import ibragim.project.core.jpaTask.services.TeachersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.print.attribute.standard.PresentationDirection;
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 public class HomeController {
 
+    @Autowired
+    CommentService commentService;
+
+    @Autowired
+    TaskService taskService;
 
     @Autowired
     TaskRepository taskRepository;
@@ -31,6 +42,9 @@ public class HomeController {
 
     @Autowired
     CommentsRepository commentsRepository;
+
+    @Autowired
+    TeachersService teachersService;
 
     @GetMapping(value = "/")
     public String getMainPage(Model model){
@@ -64,37 +78,38 @@ public class HomeController {
     public String addTask(@RequestParam(name = "name") String name,
                           @RequestParam(name = "course") String course,
                           @RequestParam(name="number") String number,
-                          @RequestParam(name="commentary") String commentary,
-                          @RequestParam(name = "teacher") Long teacher_id) {
+                          @RequestParam(name="commentary") String commentary) {
+        Task task = new Task();
+        task.setUserName(name);
+        task.setCommentary(commentary);
+        task.setCourseName(course);
+        task.setPhoneNumber(number);
 
-        Teacher teacher = teachersRepository.findById(teacher_id).orElse(null);
+        Task theTask = taskService.addTask(task);
 
-        if(teacher!=null){
-            Task task = new Task();
-            task.setUserName(name);
-            task.setCourseName(course);
-            task.setCommentary(commentary);
-            task.setPhoneNumber(number);
-            task.setHandled(false);
-            task.setTeacher(teacher);
-            taskRepository.save(task);
-        }
-
-
-        return "redirect:/";
+        return "redirect:/details/"+theTask.getId();
     }
 
 
     @GetMapping(value = "/details/{taskId}")
     public String taskDetails(@PathVariable(name = "taskId") Long id,
                               Model model){
-        Task theTask = taskRepository.findById(id).orElse(null);
-        model.addAttribute("task",theTask);
-
-        List <Comment> comments = commentsRepository.getComment(theTask.getId(), theTask.getTeacher().getId());
+        Task theTask = taskService.details(id);
+        List <Comment> comments = commentService.getComments(id);
+        List<Teacher> teachers = teachersService.getTeachers();
+        List<Teacher> unChosenTeachers = teachersService.getDifference(theTask.getId());
+        List<Teacher> chosenTeachers = theTask.getTeachers();
         if(comments!=null){
             model.addAttribute("comments", comments);
         }
+        if(teachers!=null){
+            model.addAttribute("teachers", teachers);
+        }
+        if(theTask!=null){
+            model.addAttribute("task",theTask);
+        }
+        model.addAttribute("unChosenTeachers", unChosenTeachers);
+        model.addAttribute("chosenTeachers", chosenTeachers);
         return "details";
 
     }
@@ -124,14 +139,27 @@ public class HomeController {
                              @RequestParam(name="comment") String commentText,
                              Model model){
         Comment comment = new Comment();
-        Task t = taskRepository.findById(taskId).orElse(null);
-        Teacher teacher = teachersRepository.findById(teacherId).orElse(null);
-        if(t != null && teacher !=null){
-            comment.setTeacher(teacher);
-            comment.setTask(t);
-            comment.setText(commentText);
-            commentsRepository.save(comment);
-        }
+        comment.setText(commentText);
+        commentService.addComment(comment, teacherId, taskId);
+        System.out.println(taskId);
+        System.out.println(teacherId);
         return "redirect:/details/"+taskId;
+    }
+
+    @PostMapping(value = "/addTeacherToTask")
+    public String addTeacherToTask(@RequestParam(name = "teacher") Long teacher_id,
+                                   @RequestParam(name = "task") Long task_id){
+
+        Task t = taskService.addResponsibleTeacher(task_id, teacher_id);
+        return "redirect:/details/"+t.getId();
+    }
+
+
+    @PostMapping(value = "/removeTeacherFromTask")
+    public String removeTeacherFromTask(@RequestParam(name = "teacher") Long teacher_id,
+                                        @RequestParam(name = "task") Long task_id){
+
+        Task t = taskService.removeResponsibleTeacher(task_id, teacher_id);
+        return "redirect:/details/"+t.getId();
     }
 }

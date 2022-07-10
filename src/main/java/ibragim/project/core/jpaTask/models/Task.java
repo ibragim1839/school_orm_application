@@ -3,6 +3,7 @@ package ibragim.project.core.jpaTask.models;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,7 +34,7 @@ public class Task {
     @Column(name="handled")
     Boolean handled;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Teacher teacher;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Teacher> teachers;
 
 }

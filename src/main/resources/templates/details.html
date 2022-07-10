@@ -10,7 +10,7 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-6 mx-auto mt-5">
+        <div class="col-5 mt-5 ms-auto">
             <h3  class="text-success text-center mx-auto" th:if="${task.handled} == true">Обработанная заявка</h3>
             <h3  class="text-danger text-center mx-auto" th:if="${task.handled} == false">Необработанная заявка</h3>
             <form>
@@ -30,14 +30,7 @@
                     <label for="input4" class="form-label" >Номер телефона</label>
                     <input th:value="${task.phoneNumber}" readonly id="input4" class="form-control" name="number" type="text">
                 </div>
-                <div class="mb-3">
-                    <label for="input5" class="form-label">Учитель</label>
-                    <select readonly="" id="input5" class="form-select" name="teacher">
-                        <option th:text="${task.teacher.name} + ' / ' + ${task.teacher.office}" >
-                    </select>
-                </div>
             </form>
-
             <div style="display: flex">
                 <div th:if="${task.handled}==false" class="me-3">
                     <form  th:action="@{'/handelTask'}" method="post">
@@ -50,29 +43,82 @@
                     <button type="submit" class="btn btn-danger mt-3">Удалить заявку</button>
                 </form>
             </div>
+        </div>
 
-            <form class="mt-3" th:action="@{'/addComment'}" method="post">
-                <div class="mb-3">
-                    <input hidden th:value="${task.teacher.id}" name="teacher">
-                    <input hidden th:value="${task.id}" name="task">
-                    <label for="input6" class="form-label" th:text="${'Добавить комментарий от ' + task.teacher.name}"> </label>
-                    <textarea name="comment" id="input6" class="form-control" style="height: 125px"></textarea>
-                </div>
-                <button class="btn btn-success" type="submit">Добвить комментарий</button>
-            </form>
+        <div class="col-5 mt-5 me-auto p-3" style=" border-radius: 2%; border: rgba(40,110,23,0.6) 2px solid" >
+            <h3 class="text-center text-info mx-auto">Назначить ответственных</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr th:each="teacher:${unChosenTeachers}">
+                            <form method="post" th:action="@{'/addTeacherToTask'}">
+                                <input hidden th:value="${teacher.id}" name="teacher">
+                                <input hidden th:value="${task.id}" name="task">
+                                <th th:text="${teacher.name}"></th>
+                                <th th:text="${teacher.office}"></th>
+                                <th style="width: 20%"><button type="submit" class="btn btn-success">Назначить</button></th>
+                            </form>
+                        </tr>
+                    </thead>
+                </table>
+        </div>
+    </div>
 
-            <form th:if="${comments}!=null" th:each="comment: ${comments}" class="mt-3">
-                <div class="mb-3">
-                    <label for="input7" class="form-label" th:text="${'Комментарий от ' + comment.teacher.name}"> </label>
-                    <textarea th:text="${comment.text}" readonly id="input7" class="form-control" style="height: 100px"></textarea>
-                </div>
-            </form>
 
-
+    <div class="row mt-3">
+        <div class="col-6 mx-auto mt-4 p-3" style="border-radius: 2%; background: rgba(255,242,0,0.6)">
+            <h3 class="text-center text-dark mx-auto">Отвстестввенные</h3>
+            <table class="table table-striped">
+                <thead>
+                <tr th:each="teacher:${chosenTeachers}">
+                    <form method="post" th:action="@{'/removeTeacherFromTask'}">
+                        <input hidden th:value="${teacher.id}" name="teacher">
+                        <input hidden th:value="${task.id}" name="task">
+                        <th th:text="${teacher.name}"></th>
+                        <th th:text="${teacher.office}"></th>
+                        <th style="width: 20%"><button type="submit" class="btn btn-danger">Устраанить</button></th>
+                    </form>
+                </tr>
+                </thead>
+            </table>
 
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-6 mx-auto mt-4">
+
+            <form class="mt-3" th:action="@{'/addComment'}" method="post">
+                <div class="mb-3">
+                    <input hidden th:value="${task.id}" name="task">
+                    <label for="input6" class="form-label" th:text="${'Добавить комментарий'}"> </label>
+                    <textarea name="comment" id="input6" class="form-control" style="height: 125px"></textarea>
+                </div>
+                <div style="display: flex; align-items: center">
+                    <button class="btn btn-success" type="submit" style="width: 50%">Добвить комментарий</button>
+                    <span>&nbsp;ОТ&nbsp;</span>
+                    <select id="input5" class="form-select" name="teacher" >
+                        <option name="teacher" th:each="teacher:${teachers}"  th:value="${teacher.id}" th:text="${teacher.name} + '/' + ${teacher.office}">
+                    </select>
+                </div>
+
+            </form>
+
+            <div class="bg-info p-2 mt-5">
+                <form th:if="${comments}!=null" th:each="comment: ${comments}" >
+                    <div class="mb-3">
+                        <label for="input7" class="form-label" th:text="${'Комментарий от ' + comment.teacher.name}"> </label>
+                        <textarea th:text="${comment.text}" readonly id="input7" class="form-control" style="height: 100px"></textarea>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
 </div>
+
+
+
+
 
 </body>
 </html>
